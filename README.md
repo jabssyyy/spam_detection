@@ -53,7 +53,8 @@ spam_detection/
 │
 ├── frontend/
 │   ├── index.html                 # Phase 7: UI structure
-│   ├── style.css                  # Styling (dark mode, glassmorphism)
+│   ├── style.css                  # Styling (clean, professional light mode)
+│   ├── about.html                 # Phase 7: About the Models page (metrics)
 │   └── script.js                  # API calls, result rendering
 │
 ├── models/                        # Saved trained models (auto-created)
@@ -120,15 +121,10 @@ Interactive docs: `http://127.0.0.1:8000/docs`
 
 ### Step 3 — Open the frontend
 
-Open `frontend/index.html` directly in your browser  
-or serve it with:
+The frontend UI is served directly by the FastAPI server!
+Simply open your browser and visit:
 
-```bash
-cd frontend
-python -m http.server 5500
-```
-
-Then visit `http://localhost:5500`
+**http://127.0.0.1:8000/ui**
 
 ---
 
