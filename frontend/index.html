@@ -3,36 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spam or Ham? — Carrier Pigeon Mail Inspector</title>
-  <meta name="description" content="Is your message safe to deliver? Our carrier pigeon checks every message for spam." />
+  <title>Spam Detector</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Pigeon mascot -->
-  <div class="pigeon-wrap">
-    <img src="pigeon.png" alt="Carrier Pigeon" class="pigeon-img" />
-    <div class="pigeon-bubble">Can I deliver this?</div>
-  </div>
+  <!-- ── Navigation ── -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="nav-brand">Spam Detector</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="about.html" class="nav-link">About the Models</a>
+      </div>
+    </div>
+  </nav>
 
   <div class="wrapper">
-
-    <!-- Header -->
+    <!-- ── Header ── -->
     <header class="header">
-      <h1>Ham or<br/><span class="accent">Spam?</span></h1>
-      <p class="tagline">Drop any message — the pigeon will sniff it out.</p>
+      <h1>Spam Detector</h1>
     </header>
 
-    <!-- Main card -->
+    <!-- ── Main card ── -->
     <main class="card" id="main-card">
 
       <!-- Model selector -->
       <div class="model-row">
         <label class="field-label" for="model-select">Model</label>
         <div class="model-pills" id="model-pills">
-          <button class="pill active" data-model="svm">SVM ⭐</button>
+          <button class="pill active" data-model="svm">SVM</button>
           <button class="pill" data-model="naive_bayes">Naive Bayes</button>
           <button class="pill" data-model="logistic_regression">Logistic Reg</button>
           <button class="pill" data-model="all">Compare All</button>
@@ -41,11 +43,11 @@
 
       <!-- Text input -->
       <div class="field-group">
-        <label class="field-label" for="msg-input">Your Message</label>
+        <label class="field-label" for="msg-input">Message</label>
         <div class="textarea-wrap">
           <textarea
             id="msg-input"
-            placeholder="Paste a message here and let the pigeon decide…"
+            placeholder="Type or paste a message to analyze..."
             maxlength="2000"
             rows="5"
           ></textarea>
@@ -53,21 +55,13 @@
         </div>
       </div>
 
-      <!-- Quick examples -->
-      <div class="examples">
-        <span class="examples-label">Try:</span>
-        <button class="example-btn spam-ex" id="ex-spam">🚨 Spam example</button>
-        <button class="example-btn ham-ex" id="ex-ham">✅ Ham example</button>
-      </div>
-
       <!-- Action button -->
       <button class="check-btn" id="check-btn">
-        <span class="btn-icon">🕊️</span>
-        <span class="btn-text">Send to the Pigeon</span>
+        <span class="btn-text">Analyse Message</span>
         <span class="btn-spinner" id="btn-spinner"></span>
       </button>
 
-      <!-- Result area -->
+      <!-- Result area (hidden until response) -->
       <div class="result-area" id="result-area">
 
         <!-- Single model result -->
@@ -75,7 +69,7 @@
           <div class="result-badge" id="result-badge">SPAM</div>
           <div class="result-body">
             <div class="result-row">
-              <span class="res-label">Verdict</span>
+              <span class="res-label">Prediction</span>
               <span class="res-value" id="res-prediction">—</span>
             </div>
             <div class="result-row">
@@ -91,44 +85,40 @@
               <span class="res-value" id="res-model">—</span>
             </div>
             <div class="result-row">
-              <span class="res-label">After cleaning</span>
+              <span class="res-label">Cleaned text</span>
               <span class="res-value small" id="res-cleaned">—</span>
             </div>
           </div>
+
+          <!-- Confidence bar -->
           <div class="conf-bar-wrap">
             <div class="conf-bar-track">
               <div class="conf-bar-fill" id="conf-bar"></div>
             </div>
             <div class="conf-bar-labels">
-              <span>🕊 Safe to deliver</span><span>☠ Block it</span>
+              <span>HAM</span><span>SPAM</span>
             </div>
           </div>
         </div>
 
-        <!-- All-models comparison -->
+        <!-- All-models comparison table -->
         <div class="result-compare" id="result-compare">
-          <h3 class="compare-title">All three models weigh in</h3>
-          <div class="compare-table" id="compare-table"></div>
+          <h3 class="compare-title">Model Comparison</h3>
+          <div class="compare-table" id="compare-table">
+            <!-- filled by JS -->
+          </div>
         </div>
 
-      </div>
+      </div><!-- /result-area -->
 
       <!-- Error banner -->
       <div class="error-banner" id="error-banner">
-        <span>🕊</span> <span id="error-msg">Something went wrong.</span>
+        <span id="error-msg">Something went wrong.</span>
       </div>
 
     </main>
 
-    <!-- Stats strip -->
-    <div class="stats-strip">
-      <div class="stat"><span class="stat-val">5,572</span><span class="stat-lbl">Messages trained on</span></div>
-      <div class="stat"><span class="stat-val">98.65%</span><span class="stat-lbl">SVM accuracy</span></div>
-      <div class="stat"><span class="stat-val">94.85%</span><span class="stat-lbl">F1 score</span></div>
-      <div class="stat"><span class="stat-val">5,000</span><span class="stat-lbl">TF-IDF features</span></div>
-    </div>
-
-  </div>
+  </div><!-- /wrapper -->
 
   <script src="script.js"></script>
 </body>

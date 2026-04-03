@@ -11,7 +11,6 @@ const compareTable= document.getElementById("compare-table");
 const errorBanner = document.getElementById("error-banner");
 const errorMsg    = document.getElementById("error-msg");
 const confBar     = document.getElementById("conf-bar");
-const pigeonBubble = document.querySelector(".pigeon-bubble");
 
 // Single-model result fields
 const resPrediction = document.getElementById("res-prediction");
@@ -21,125 +20,130 @@ const resModel      = document.getElementById("res-model");
 const resCleaned    = document.getElementById("res-cleaned");
 const resultBadge   = document.getElementById("result-badge");
 
-// ── Model pill selection ──────────────────────────────────────────
-let selectedModel = "svm";
+// Ensure required elements exist before adding listeners (prevents errors on about.html)
+if (msgInput && document.getElementById("model-pills")) {
+  
+  // ── Model pill selection ──────────────────────────────────────────
+  let selectedModel = "svm";
 
-document.getElementById("model-pills").addEventListener("click", e => {
-  const pill = e.target.closest(".pill");
-  if (!pill) return;
-  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
-  pill.classList.add("active");
-  selectedModel = pill.dataset.model;
-});
+  document.getElementById("model-pills").addEventListener("click", e => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    selectedModel = pill.dataset.model;
+  });
 
-// ── Character counter ─────────────────────────────────────────────
-msgInput.addEventListener("input", () => {
-  charCount.textContent = `${msgInput.value.length} / 2000`;
-});
+  // ── Character counter ─────────────────────────────────────────────
+  msgInput.addEventListener("input", () => {
+    charCount.textContent = `${msgInput.value.length} / 2000`;
+  });
 
-// ── Example messages ──────────────────────────────────────────────
-const SPAM_EXAMPLE = "FREE ENTRY! You have WON our weekly prize draw! To claim your £1000 Tesco voucher call 07XXXXXXXXX NOW! T&C apply.";
-const HAM_EXAMPLE  = "Hey! Are you free this weekend? We're having a small get-together at mine on Saturday evening. Let me know if you can make it!";
+  // ── Enter key shortcut (Ctrl/Cmd + Enter) ────────────────────────
+  msgInput.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") checkBtn.click();
+  });
 
-document.getElementById("ex-spam").addEventListener("click", () => {
-  msgInput.value = SPAM_EXAMPLE;
-  charCount.textContent = `${SPAM_EXAMPLE.length} / 2000`;
-  msgInput.focus();
-});
-document.getElementById("ex-ham").addEventListener("click", () => {
-  msgInput.value = HAM_EXAMPLE;
-  charCount.textContent = `${HAM_EXAMPLE.length} / 2000`;
-  msgInput.focus();
-});
+  // ── Main: analyse button ──────────────────────────────────────────
+  checkBtn.addEventListener("click", analyse);
 
-// ── Enter key shortcut (Ctrl/Cmd + Enter) ────────────────────────
-msgInput.addEventListener("keydown", e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") checkBtn.click();
-});
+  async function analyse() {
+    const text = msgInput.value.trim();
+    if (!text) { showError("Please enter a message first."); return; }
 
-// ── Main: analyse button ──────────────────────────────────────────
-checkBtn.addEventListener("click", analyse);
+    setLoading(true);
+    hideAll();
 
-async function analyse() {
-  const text = msgInput.value.trim();
-  if (!text) { showError("Please enter a message first."); return; }
-
-  setLoading(true);
-  hideAll();
-
-  try {
-    if (selectedModel === "all") {
-      await runCompare(text);
-    } else {
-      await runSingle(text, selectedModel);
+    try {
+      if (selectedModel === "all") {
+        await runCompare(text);
+      } else {
+        await runSingle(text, selectedModel);
+      }
+    } catch (err) {
+      showError(err.message || "Cannot reach the API. Is the server running?");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    showError(err.message || "Cannot reach the API. Is the server running on port 8000?");
-  } finally {
-    setLoading(false);
   }
-}
 
-// ── Single model prediction ───────────────────────────────────────
-async function runSingle(text, model) {
-  const res  = await apiFetch("/predict", "POST", { text, model });
-  const isSpam = res.label === 1;
+  // ── Single model prediction ───────────────────────────────────────
+  async function runSingle(text, model) {
+    const res  = await apiFetch("/predict", "POST", { text, model });
+    const isSpam = res.label === 1;
 
-  // Badge
-  resultBadge.textContent = isSpam ? "⚠ SPAM" : "✓ HAM";
-  resultBadge.className   = "result-badge " + (isSpam ? "spam" : "ham");
+    // Badge
+    resultBadge.textContent = isSpam ? "⚠ SPAM" : "✓ HAM";
+    resultBadge.className   = "result-badge " + (isSpam ? "spam" : "ham");
 
-  // Fields
-  resPrediction.textContent = isSpam ? "SPAM 🚨" : "HAM ✅";
-  resSpamProb.textContent   = `${(res.spam_prob * 100).toFixed(2)}%`;
-  resConfidence.textContent = `${(res.confidence * 100).toFixed(2)}%`;
-  resModel.textContent      = model.replace("_", " ").toUpperCase();
-  resCleaned.textContent    = res.pipeline.cleaned_text || "(empty after cleaning)";
+    // Fields
+    resPrediction.textContent = isSpam ? "SPAM" : "HAM";
+    resSpamProb.textContent   = `${(res.spam_prob * 100).toFixed(2)}%`;
+    resConfidence.textContent = `${(res.confidence * 100).toFixed(2)}%`;
+    resModel.textContent      = model.replace("_", " ").toUpperCase();
+    resCleaned.textContent    = res.pipeline.cleaned_text || "(empty after cleaning)";
 
-  // Confidence bar: position = spam_prob (0→left=ham, 100→right=spam)
-  confBar.className = "conf-bar-fill " + (isSpam ? "spam" : "ham");
-  setTimeout(() => confBar.style.width = `${res.spam_prob * 100}%`, 50);
+    // Confidence bar: position = spam_prob (0→left=ham, 100→right=spam)
+    confBar.className = "conf-bar-fill " + (isSpam ? "spam" : "ham");
+    setTimeout(() => confBar.style.width = `${res.spam_prob * 100}%`, 50);
 
-  resultSingle.classList.add("visible");
-  resultArea.classList.add("visible");
+    resultSingle.classList.add("visible");
+    resultArea.classList.add("visible");
+  }
 
-  // Pigeon reacts
-  pigeonBubble.textContent = isSpam ? "🚨 Not delivering THAT." : "✅ Safe! I'll deliver it.";
-  pigeonBubble.classList.add("show");
-}
+  // ── All-models comparison ─────────────────────────────────────────
+  async function runCompare(text) {
+    const params = new URLSearchParams({ text });
+    const res    = await apiFetch(`/predict/compare?${params}`, "GET");
+    const models = res.comparison;
 
-// ── All-models comparison ─────────────────────────────────────────
-async function runCompare(text) {
-  const params = new URLSearchParams({ text });
-  const res    = await apiFetch(`/predict/compare?${params}`, "GET");
-  const models = res.comparison;
+    compareTable.innerHTML = "";
+    for (const [name, data] of Object.entries(models)) {
+      const isSpam     = data.prediction === "spam";
+      const barColor   = isSpam ? "var(--spam-color)" : "var(--ham-color)";
+      const pct        = Math.round(data.spam_prob * 100);
+      const label      = name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-  compareTable.innerHTML = "";
-  for (const [name, data] of Object.entries(models)) {
-    const isSpam     = data.prediction === "spam";
-    const barColor   = isSpam ? "#ff4757" : "#2ed573";
-    const pct        = Math.round(data.spam_prob * 100);
-    const label      = name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-
-    compareTable.innerHTML += `
-      <div class="compare-row">
-        <span class="cmp-model">${label}</span>
-        <span class="cmp-badge ${isSpam ? "spam" : "ham"}">${isSpam ? "SPAM" : "HAM"}</span>
-        <span class="cmp-conf">spam ${pct}%</span>
-        <div class="cmp-bar-mini">
-          <div class="cmp-bar-mini-fill"
-               style="width:${pct}%; background:${barColor}; transition: width 0.6s ease">
+      compareTable.innerHTML += `
+        <div class="compare-row">
+          <span class="cmp-model">${label}</span>
+          <span class="cmp-badge ${isSpam ? "spam" : "ham"}">${isSpam ? "SPAM" : "HAM"}</span>
+          <span class="cmp-conf">spam ${pct}%</span>
+          <div class="cmp-bar-mini">
+            <div class="cmp-bar-mini-fill"
+                 style="width:${pct}%; background:${barColor}; transition: width 0.6s ease">
+            </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
+    }
+
+    resultComp.classList.add("visible");
+    resultArea.classList.add("visible");
   }
 
-  resultComp.classList.add("visible");
-  resultArea.classList.add("visible");
+  // ── UI state helpers ──────────────────────────────────────────────
+  function setLoading(on) {
+    checkBtn.disabled = on;
+    checkBtn.classList.toggle("loading", on);
+  }
+
+  function hideAll() {
+    resultArea.classList.remove("visible");
+    resultSingle.classList.remove("visible");
+    resultComp.classList.remove("visible");
+    errorBanner.classList.remove("visible");
+    confBar.style.width = "0%";
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorBanner.classList.add("visible");
+    resultArea.classList.remove("visible");
+  }
 }
 
-// ── API helper ────────────────────────────────────────────────────
+// ── API helper (Used everywhere) ──────────────────────────────────
 async function apiFetch(path, method = "GET", body = null) {
   const opts = {
     method,
@@ -153,24 +157,4 @@ async function apiFetch(path, method = "GET", body = null) {
     throw new Error(err.detail || `Server error ${response.status}`);
   }
   return response.json();
-}
-
-// ── UI state helpers ──────────────────────────────────────────────
-function setLoading(on) {
-  checkBtn.disabled = on;
-  checkBtn.classList.toggle("loading", on);
-}
-
-function hideAll() {
-  resultArea.classList.remove("visible");
-  resultSingle.classList.remove("visible");
-  resultComp.classList.remove("visible");
-  errorBanner.classList.remove("visible");
-  confBar.style.width = "0%";
-}
-
-function showError(msg) {
-  errorMsg.textContent = msg;
-  errorBanner.classList.add("visible");
-  resultArea.classList.remove("visible");
 }

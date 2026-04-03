@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About the Models</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="nav-brand">Spam Detector</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link active">About the Models</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <header class="header">
+      <h1>About the Models</h1>
+      <p class="summary-text">
+        Below is the evaluation performance for the three machine learning models used in this spam detector.
+        Evaluated on 20% of the dataset (1,115 messages).
+      </p>
+    </header>
+
+    <!-- ── SVM Model ── -->
+    <section class="card model-section">
+      <h2 class="model-title">Support Vector Machine (SVM)</h2>
+      <p class="model-desc">The default and best overall model. Excellent balance of high accuracy and high recall, meaning it flags spam very effectively while keeping false alerts low.</p>
+      
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="m-val">98.65%</div><div class="m-lbl">Accuracy</div></div>
+        <div class="metric-card"><div class="m-val">97.18%</div><div class="m-lbl">Precision</div></div>
+        <div class="metric-card"><div class="m-val">92.62%</div><div class="m-lbl">Recall</div></div>
+        <div class="metric-card"><div class="m-val">94.85%</div><div class="m-lbl">F1 Score</div></div>
+      </div>
+
+      <h3 class="cm-title">Confusion Matrix</h3>
+      <table class="conf-matrix">
+        <tr>
+          <th></th>
+          <th>Predicted HAM</th>
+          <th>Predicted SPAM</th>
+        </tr>
+        <tr>
+          <th>Actual HAM</th>
+          <td class="cm-cell correct">
+            <span class="cm-num">962</span>
+            <span class="cm-label">True Negative</span>
+          </td>
+          <td class="cm-cell error">
+            <span class="cm-num">4</span>
+            <span class="cm-label">False Positive</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Actual SPAM</th>
+          <td class="cm-cell error">
+            <span class="cm-num">11</span>
+            <span class="cm-label">False Negative</span>
+          </td>
+          <td class="cm-cell correct">
+            <span class="cm-num">138</span>
+            <span class="cm-label">True Positive</span>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- ── Naive Bayes ── -->
+    <section class="card model-section">
+      <h2 class="model-title">Naive Bayes</h2>
+      <p class="model-desc">A highly precise model. It is very conservative and almost never flags a legitimate message as spam, but it misses more spam messages as a result.</p>
+      
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="m-val">98.21%</div><div class="m-lbl">Accuracy</div></div>
+        <div class="metric-card"><div class="m-val">99.24%</div><div class="m-lbl">Precision</div></div>
+        <div class="metric-card"><div class="m-val">87.25%</div><div class="m-lbl">Recall</div></div>
+        <div class="metric-card"><div class="m-val">92.86%</div><div class="m-lbl">F1 Score</div></div>
+      </div>
+
+      <h3 class="cm-title">Confusion Matrix</h3>
+      <table class="conf-matrix">
+        <tr>
+          <th></th>
+          <th>Predicted HAM</th>
+          <th>Predicted SPAM</th>
+        </tr>
+        <tr>
+          <th>Actual HAM</th>
+          <td class="cm-cell correct">
+            <span class="cm-num">965</span>
+            <span class="cm-label">True Negative</span>
+          </td>
+          <td class="cm-cell error">
+            <span class="cm-num">1</span>
+            <span class="cm-label">False Positive</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Actual SPAM</th>
+          <td class="cm-cell error">
+            <span class="cm-num">19</span>
+            <span class="cm-label">False Negative</span>
+          </td>
+          <td class="cm-cell correct">
+            <span class="cm-num">130</span>
+            <span class="cm-label">True Positive</span>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- ── Logistic Regression ── -->
+    <section class="card model-section">
+      <h2 class="model-title">Logistic Regression</h2>
+      <p class="model-desc">A solid baseline model. Very low false positive rate, but misses the most spam compared to SVM and Naive Bayes.</p>
+      
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="m-val">96.86%</div><div class="m-lbl">Accuracy</div></div>
+        <div class="metric-card"><div class="m-val">98.31%</div><div class="m-lbl">Precision</div></div>
+        <div class="metric-card"><div class="m-val">77.85%</div><div class="m-lbl">Recall</div></div>
+        <div class="metric-card"><div class="m-val">86.89%</div><div class="m-lbl">F1 Score</div></div>
+      </div>
+
+      <h3 class="cm-title">Confusion Matrix</h3>
+      <table class="conf-matrix">
+        <tr>
+          <th></th>
+          <th>Predicted HAM</th>
+          <th>Predicted SPAM</th>
+        </tr>
+        <tr>
+          <th>Actual HAM</th>
+          <td class="cm-cell correct">
+            <span class="cm-num">964</span>
+            <span class="cm-label">True Negative</span>
+          </td>
+          <td class="cm-cell error">
+            <span class="cm-num">2</span>
+            <span class="cm-label">False Positive</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Actual SPAM</th>
+          <td class="cm-cell error">
+            <span class="cm-num">33</span>
+            <span class="cm-label">False Negative</span>
+          </td>
+          <td class="cm-cell correct">
+            <span class="cm-num">116</span>
+            <span class="cm-label">True Positive</span>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+  </div>
+
+</body>
+</html>
