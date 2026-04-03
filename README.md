@@ -1,27 +1,33 @@
-# 🛡️ Spam Detection with Machine Learning
+# 📩 Spam Detection with Machine Learning
 
-> An end-to-end spam classifier built with Python, scikit-learn, FastAPI, and a slick frontend UI — designed not just to *work* but to *teach* you how every piece fits together.
-
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.7-orange?style=flat-square&logo=scikit-learn)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.135-green?style=flat-square&logo=fastapi)
-![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)
+An end-to-end SMS spam detection system built from scratch as a learning project.
+Covers data exploration, text preprocessing, TF-IDF vectorization, model training,
+evaluation with confusion matrices, a REST API backend, and a modern frontend UI.
 
 ---
 
-## 📌 Project Overview
+## 🚀 What This Project Does
 
-This project builds a **binary text classifier** that detects whether an SMS message is **spam** or **ham** (legitimate). It covers the full ML pipeline — from raw data to a live web API with a frontend.
+- Classifies any SMS message as **SPAM** or **HAM** (not spam) in real time
+- Trains three ML models: Naive Bayes, Logistic Regression, and SVM
+- Deep-dives into model evaluation — confusion matrix, precision, recall, F1
+- Serves predictions via a **FastAPI** REST API
+- Provides a **modern browser UI** to interact with the classifier
 
-| Label | Meaning | Value |
-|-------|---------|-------|
-| Ham | Legitimate message | 0 |
-| Spam | Unwanted/junk message | 1 |
+---
 
-**Key focus areas:**
-- Understanding *why* each step is done, not just *what*
-- Deep-diving into model evaluation (confusion matrix, precision, recall, F1)
-- Analyzing the impact of class imbalance on model selection
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Python 3.10+ |
+| ML / NLP | scikit-learn, NLTK, NumPy, pandas |
+| Vectorization | TF-IDF (`TfidfVectorizer`) |
+| Models | MultinomialNB, LogisticRegression, LinearSVC |
+| API | FastAPI + Uvicorn |
+| Serialization | joblib |
+| Visualization | Matplotlib, Seaborn |
+| Frontend | HTML5, CSS3, Vanilla JS |
 
 ---
 
@@ -30,179 +36,124 @@ This project builds a **binary text classifier** that detects whether an SMS mes
 ```
 spam_detection/
 │
-├── README.md                    # You are here
-├── requirements.txt             # Python dependencies
-│
 ├── data/
-│   └── spam.csv                 # SMS Spam Collection Dataset (~5,500 messages)
+│   └── spam.csv                   # SMS Spam Collection dataset (5,572 messages)
 │
-├── src/                         # Core ML logic
+├── src/
 │   ├── __init__.py
-│   ├── explore.py               # Phase 1: Data exploration & visualization
-│   ├── preprocessing.py         # Phase 2: Text cleaning pipeline
-│   ├── vectorizer.py            # Phase 3: TF-IDF transformation
-│   ├── train.py                 # Phase 4: Model training (NB, LR, SVM)
-│   └── evaluate.py              # Phase 5: Metrics & confusion matrix
+│   ├── explore.py                 # Phase 1: Data exploration & visualization
+│   ├── preprocessing.py           # Phase 2: Text cleaning pipeline
+│   ├── vectorizer.py              # Phase 3: TF-IDF vectorization
+│   ├── train.py                   # Phase 4: Model training (NB, LR, SVM)
+│   └── evaluate.py                # Phase 5: Confusion matrix & metrics
 │
 ├── api/
-│   └── main.py                  # Phase 6: FastAPI /predict endpoint
+│   ├── __init__.py
+│   └── main.py                    # Phase 6: FastAPI backend
 │
 ├── frontend/
-│   ├── index.html               # Phase 7: UI
-│   ├── style.css
-│   └── script.js
+│   ├── index.html                 # Phase 7: UI structure
+│   ├── style.css                  # Styling (dark mode, glassmorphism)
+│   └── script.js                  # API calls, result rendering
 │
-├── models/                      # Saved trained models (generated)
+├── models/                        # Saved trained models (auto-created)
 │   ├── naive_bayes.pkl
 │   ├── logistic_regression.pkl
 │   ├── svm.pkl
-│   └── tfidf_vectorizer.pkl
+│   ├── tfidf_vectorizer.pkl
+│   └── split_indices.pkl
 │
-└── outputs/                     # Charts & visualizations (generated)
-    └── phase1_exploration.png
+├── outputs/                       # Generated visualizations
+│   ├── phase1_exploration.png
+│   └── phase5_evaluation.png
+│
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 🧠 End-to-End Pipeline
-
-```
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  Raw Text    │ →  │ Preprocessed │ →  │  Numerical   │ →  │   Trained    │
-│  Messages    │    │    Text      │    │   Vectors    │    │    Model     │
-└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
-   spam.csv          lowercase,          TF-IDF              NB, LR, SVM
-                     no stopwords        vectors
-```
-
----
-
-## 🚀 8 Phases Explained
-
-| Phase | Name | What Happens |
-|-------|------|-------------|
-| 1 | Data Exploration | Load data, check distribution, visualize |
-| 2 | Preprocessing | Clean text (lowercase, remove noise, stopwords) |
-| 3 | Vectorization | Convert text → TF-IDF numeric vectors |
-| 4 | Model Training | Train Naive Bayes, Logistic Regression, SVM |
-| 5 | Evaluation | Confusion matrix, precision, recall, F1 |
-| 6 | API Backend | FastAPI `/predict` endpoint |
-| 7 | Frontend | HTML/CSS/JS user interface |
-| 8 | Integration | Connect frontend ↔ backend, end-to-end test |
-
----
-
-## 📊 Dataset
-
-- **Source:** [SMS Spam Collection — Kaggle](https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset)
-- **Size:** ~5,572 messages
-- **Class Distribution:** ~87% Ham, ~13% Spam (imbalanced!)
-
-> ⚠️ **Why imbalance matters:** A model that always predicts "ham" would be 87% accurate — but catches ZERO spam. This is why we use **Precision, Recall, and F1** instead of accuracy alone.
-
----
-
-## 🔬 Models Used
-
-| Model | Why Good for Text? |
-|-------|-------------------|
-| **Naive Bayes** | Fast, works great with word frequencies |
-| **Logistic Regression** | Interpretable weights, solid baseline |
-| **SVM** | Works well with high-dimensional data |
-
----
-
-## 📐 Evaluation Metrics — Confusion Matrix
-
-```
-                    Predicted
-                 Spam    Ham
-Actual  Spam  [  TP  |  FN  ]   ← Missing spam is dangerous!
-        Ham   [  FP  |  TN  ]   ← Blocking ham is annoying
-```
-
-| Metric | Formula | What It Tells You |
-|--------|---------|-------------------|
-| **Accuracy** | (TP+TN) / Total | Overall correctness (misleading on imbalanced data!) |
-| **Precision** | TP / (TP+FP) | Of predicted spam, how many are actually spam? |
-| **Recall** | TP / (TP+FN) | Of actual spam, how many did we catch? |
-| **F1 Score** | 2×(P×R)/(P+R) | Harmonic mean — best single metric for imbalanced data |
-
----
-
-## ⚙️ Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Language | Python 3.10+ |
-| ML Library | scikit-learn |
-| Data Handling | pandas, numpy |
-| Text Processing | NLTK |
-| API Backend | FastAPI + Uvicorn |
-| Frontend | HTML + CSS + JavaScript |
-| Model Storage | joblib |
-| Visualization | matplotlib, seaborn |
-
----
-
-## 🛠️ Setup & Installation
-
-### 1. Clone the repository
+## ⚙️ Installation
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/jabssyyy/spam_detection.git
 cd spam_detection
-```
 
-### 2. Install dependencies
+# 2. Create and activate a virtual environment (recommended)
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS / Linux
 
-```bash
+# 3. Install dependencies
 pip install -r requirements.txt
-```
 
-### 3. Download NLTK stopwords (first time only)
-
-```python
-python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
+# 4. Download NLTK stopwords (one-time)
+python -c "import nltk; nltk.download('stopwords')"
 ```
 
 ---
 
 ## ▶️ How to Run
 
-### Phase 1 — Explore the data
-```bash
-python -m src.explore
-```
-> Outputs a 4-panel chart to `outputs/phase1_exploration.png`
+### Step 1 — Train the models (if `models/` is empty)
 
-### Phase 4 — Train all models
 ```bash
 python -m src.train
 ```
-> Saves trained models to `models/`
 
-### Phase 6 — Start the API server
+This will:
+- Load and preprocess all 5,572 messages
+- Build the TF-IDF vocabulary on training data only
+- Train Naive Bayes, Logistic Regression, and SVM
+- Save all models + vectorizer to `models/`
+
+### Step 2 — Start the API server
+
 ```bash
-uvicorn api.main:app --reload
+uvicorn api.main:app --reload --port 8000
 ```
-> API available at `http://localhost:8000`
-> Auto-docs at `http://localhost:8000/docs`
 
-### Phase 7 — Open the frontend
+Server starts at: `http://127.0.0.1:8000`  
+Interactive docs: `http://127.0.0.1:8000/docs`
+
+### Step 3 — Open the frontend
+
+Open `frontend/index.html` directly in your browser  
+or serve it with:
+
+```bash
+cd frontend
+python -m http.server 5500
 ```
-Open frontend/index.html in your browser
-```
+
+Then visit `http://localhost:5500`
 
 ---
 
-## 🌐 API Usage
+## 🔌 API Documentation
 
-**POST** `/predict`
+### `GET /`
+Health check — confirms server and models are ready.
 
 ```json
 {
-  "message": "Congratulations! You've won a FREE prize. Call now!"
+  "status": "healthy",
+  "models_loaded": ["naive_bayes", "logistic_regression", "svm"],
+  "default_model": "svm",
+  "uptime_seconds": 42.1
+}
+```
+
+### `POST /predict`
+Classify a single message.
+
+**Request:**
+```json
+{
+  "text": "FREE ENTRY! You have WON a prize. Call NOW!",
+  "model": "svm"
 }
 ```
 
@@ -210,65 +161,138 @@ Open frontend/index.html in your browser
 ```json
 {
   "prediction": "spam",
-  "confidence": 0.97,
-  "model": "naive_bayes"
+  "label": 1,
+  "confidence": 0.9928,
+  "spam_prob": 0.9928,
+  "ham_prob": 0.0072,
+  "model_used": "svm",
+  "pipeline": {
+    "raw_text": "FREE ENTRY! ...",
+    "cleaned_text": "free entry prize call",
+    "token_count": 4
+  }
 }
+```
+
+### `POST /predict/batch`
+Classify multiple messages in one call.
+
+**Request:**
+```json
+{
+  "texts": ["Free prize call now!", "See you tomorrow"],
+  "model": "svm"
+}
+```
+
+### `GET /predict/compare?text=<message>`
+Run the same message through all 3 models simultaneously.
+
+### `GET /models`
+List all available models.
+
+---
+
+## 📊 Model Performance
+
+All models evaluated on a held-out test set (20% of data, 1,115 messages).
+The same 80/20 stratified split is used for all comparisons.
+
+| Model | Accuracy | Precision | Recall | F1 Score | Missed Spam (FN) |
+|-------|----------|-----------|--------|----------|-----------------|
+| Naive Bayes | 98.21% | 99.24% | 87.25% | 92.86% | 19 |
+| Logistic Regression | 96.86% | 98.31% | 77.85% | 86.89% | 33 |
+| **SVM ⭐** | **98.65%** | 97.18% | **92.62%** | **94.85%** | **11** |
+
+### Confusion Matrix — SVM (Best Model)
+
+```
+                  Predicted HAM   Predicted SPAM
+Actual HAM  (0)       962               4          ← 4 false alarms
+Actual SPAM (1)        11             138          ← 11 missed spams
+```
+
+> **Why Recall matters most for spam:**
+> A missed spam (FN) reaches the inbox — dangerous.
+> A false alarm (FP) blocks a legitimate message — simply annoying.
+> SVM has the highest recall (92.62%) = catches the most spam.
+
+---
+
+## 🧠 ML Pipeline — How It Works
+
+```
+Raw SMS Text
+    │
+    ▼  Phase 2: Preprocessing
+lowercase → remove URLs → remove numbers → remove punctuation
+    → remove stopwords → tokenize
+    │
+    ▼  Phase 3: TF-IDF Vectorization
+Each message → sparse vector of 5,000 TF-IDF weighted features
+(fit vocabulary on TRAINING data only — no data leakage!)
+    │
+    ▼  Phase 4: Model Training
+Naive Bayes  → models word probability per class
+Logistic Reg → learns weights for each word
+SVM          → finds max-margin hyperplane in 5000-D space
+    │
+    ▼  Phase 5: Evaluation
+Confusion matrix, precision, recall, F1 — for all 3 models
+    │
+    ▼  Phase 6–7: API + Frontend
+FastAPI serves predictions at /predict
+Browser UI calls the API and renders results
 ```
 
 ---
 
-## 📈 Phase 1 Results (Data Exploration)
+## 📈 Integration Test Results (Phase 8)
 
-| Stat | Value |
-|------|-------|
-| Total Messages | 5,572 |
-| Ham Messages | 4,825 (86.6%) |
-| Spam Messages | 747 (13.4%) |
-| Avg Spam Length | 139 characters |
-| Avg Ham Length | 71 characters |
-| Missing Values | 0 |
+17 / 17 tests passed ✅
 
-**Key Finding:** Spam messages are nearly **2× longer** than ham and contain distinctive vocabulary: `"free"`, `"win"`, `"claim"`, `"prize"`, `"call now"`, etc.
+| Group | Tests | Result |
+|-------|-------|--------|
+| Spam messages | 6 | 6/6 PASS |
+| Ham messages | 6 | 6/6 PASS |
+| Edge cases | 5 | 5/5 PASS |
 
 ---
 
-## 💡 Key Concepts to Understand
+## 💡 Key Concepts Learned
 
-### Why TF-IDF over Bag of Words?
-- **BoW** just counts word frequency
-- **TF-IDF** weights words by *importance* — rare words get higher scores
-- The word `"free"` appearing in spam a lot gets a high TF-IDF weight
-
-### Why Stemming?
-- `"running"`, `"runs"`, `"runner"` → all become `"run"`
-- Reduces vocabulary size, helps the model generalize
-
-### Why NOT just use accuracy?
-- With 87% ham, predicting "ham" always = 87% accurate but 0% useful
-- **F1 Score** penalizes models that ignore the minority class (spam)
-
----
-
-## 📝 Learning Notes
-
-This project is structured as a **learning journey**. Every file is heavily commented with:
-- `WHY` we do each step
-- `WHAT` goes in and comes out
-- Real examples from the dataset
-- Connections to ML theory
+| Concept | Where used |
+|---------|-----------|
+| Class imbalance | Phase 1 (87% ham, 13% spam) |
+| Text preprocessing | Phase 2 (NLTK stopwords, regex) |
+| TF-IDF | Phase 3 (why it beats Bag of Words) |
+| Train-test split (stratified) | Phase 4 |
+| Confusion matrix | Phase 5 (TP, TN, FP, FN) |
+| Precision vs Recall trade-off | Phase 5 |
+| REST API design | Phase 6 (FastAPI, Pydantic) |
+| CORS | Phase 6 (browser security) |
+| async/await + fetch | Phase 7 (JavaScript) |
+| Data leakage | Phase 4 (fit vectorizer on train only) |
 
 ---
 
-## 🤝 Contributing
+## 🔮 Future Improvements
 
-Pull requests are welcome! If you find a bug or want to add a new model, open an issue first.
+- [ ] Add stemming / lemmatization (Porter Stemmer)
+- [ ] Try deep learning: LSTM or DistilBERT for context-aware detection
+- [ ] Add confidence threshold for "uncertain" predictions
+- [ ] Add user feedback loop (mark predictions as wrong → retrain)
+- [ ] Deploy to cloud (Render / Railway / HuggingFace Spaces)
+- [ ] Add email header analysis (sender, subject line features)
 
 ---
 
-## 📄 License
+## 📄 Dataset
 
-MIT License — free to use, modify, and distribute.
+**SMS Spam Collection v.1**  
+Source: [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/sms+spam+collection)  
+Size: 5,572 messages (4,825 ham + 747 spam)
 
 ---
 
-*Built as a learning project to deeply understand spam detection, text classification, and model evaluation with confusion matrices.*
+*Built as a hands-on ML learning project — Phase 1 through Phase 8*
