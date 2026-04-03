@@ -11,6 +11,8 @@ import joblib
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -19,8 +21,9 @@ from src.preprocessing import preprocess_to_string
 from src.vectorizer    import transform_texts
 
 # ── Paths ──────────────────────────────────────────────────────────
-BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODELS_DIR = os.path.join(BASE_DIR, "models")
+BASE_DIR      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODELS_DIR    = os.path.join(BASE_DIR, "models")
+FRONTEND_DIR  = os.path.join(BASE_DIR, "frontend")
 
 MODEL_FILES = {
     "naive_bayes"         : os.path.join(MODELS_DIR, "naive_bayes.pkl"),
@@ -162,6 +165,12 @@ def health_check():
     }
 
 
+@app.get("/app", tags=["Frontend"], include_in_schema=False)
+def serve_ui():
+    """Serve the frontend UI directly from FastAPI."""
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+
 @app.get("/models", response_model=ModelInfoResponse, tags=["Info"])
 def model_info():
     """List all available models and which one is the default."""
@@ -223,3 +232,7 @@ def compare_all_models(text: str):
             "confidence" : r.confidence,
         }
     return {"text": text, "comparison": comparison}
+
+
+# Mount static files LAST (so API routes take priority)
+app.mount("/ui", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

@@ -51,17 +51,15 @@ def load_and_prepare_data():
     df.columns = ["label", "message"]
     print(f"  Loaded {len(df):,} messages  |  spam: {(df.label=='spam').sum()}  ham: {(df.label=='ham').sum()}")
 
-    # Encode labels: spam=1, ham=0
+    # spam=1, ham=0
     df["label_int"] = (df["label"] == "spam").astype(int)
 
-    # Preprocess all messages
+    # Preprocess
     print("  Preprocessing text... ", end="", flush=True)
     df["clean"] = df["message"].apply(preprocess_to_string)
     print("done")
 
-    # Fit TF-IDF ONLY on training data would be ideal, but here we
-    # fit on all data first to get feature names for display.
-    # In split_data we refit on X_train only — see the note there.
+    # Initial fit on all data for display; refitted on train-only below
     print("  Vectorizing (TF-IDF)... ", end="", flush=True)
     vectorizer, X = fit_transform_texts(df["clean"].tolist())
     print("done")
@@ -79,19 +77,12 @@ def load_and_prepare_data():
 # ══════════════════════════════════════════════════════════════════
 # 2. TRAIN-TEST SPLIT
 # ══════════════════════════════════════════════════════════════════
-def split_data(X, y, texts, test_size=0.2, random_state=42):
-    """
-    Split into train/test sets with stratification.
-
-    stratify=y  →  ensures BOTH splits keep the same spam/ham ratio.
-    Without it, by random chance test might get 5% spam or 20% spam,
-    making evaluation misleading.
-    """
+def split_data(X, y, test_size=0.2, random_state=42):
+    """Split into train/test sets with stratification to preserve spam/ham ratio."""
     print(f"\n{SEP}")
     print("  STEP 2: TRAIN / TEST SPLIT")
     print(SEP2)
 
-    # Split indices so we can also refit the vectorizer on train only
     indices = np.arange(len(y))
     train_idx, test_idx = train_test_split(
         indices, test_size=test_size, random_state=random_state, stratify=y
@@ -117,11 +108,7 @@ def split_data(X, y, texts, test_size=0.2, random_state=42):
 # 3. TRAIN — NAIVE BAYES
 # ══════════════════════════════════════════════════════════════════
 def train_naive_bayes(X_train, y_train, feature_names, top_n=12):
-    """
-    Trains MultinomialNB.
-    MultinomialNB works with non-negative counts/frequencies — perfect
-    for TF-IDF values which are always >= 0.
-    """
+    """Train MultinomialNB and print top spam/ham indicator words."""
     print(f"\n{SEP}")
     print("  STEP 3a: TRAINING NAIVE BAYES")
     print(SEP2)
@@ -134,7 +121,7 @@ def train_naive_bayes(X_train, y_train, feature_names, top_n=12):
     print(f"  Training time : {elapsed:.3f}s  (Naive Bayes is the fastest!)")
     print(f"  Classes       : {model.classes_}  (0=ham, 1=spam)")
 
-    # Log-prob difference: high positive = strong spam word
+    # high positive diff = strong spam indicator
     log_prob_diff = model.feature_log_prob_[1] - model.feature_log_prob_[0]
     spam_top_idx  = np.argsort(log_prob_diff)[-top_n:][::-1]
     ham_top_idx   = np.argsort(log_prob_diff)[:top_n]
@@ -156,11 +143,7 @@ def train_naive_bayes(X_train, y_train, feature_names, top_n=12):
 # 4. TRAIN — LOGISTIC REGRESSION
 # ══════════════════════════════════════════════════════════════════
 def train_logistic_regression(X_train, y_train, feature_names, top_n=12):
-    """
-    Trains LogisticRegression.
-    Coefficients tell us: positive weight = pushes toward SPAM,
-    negative weight = pushes toward HAM.
-    """
+    """Train LogisticRegression and print top spam/ham coefficient words."""
     print(f"\n{SEP}")
     print("  STEP 3b: TRAINING LOGISTIC REGRESSION")
     print(SEP2)
@@ -199,18 +182,13 @@ def train_logistic_regression(X_train, y_train, feature_names, top_n=12):
 # 5. TRAIN — SVM (LinearSVC + Calibration)
 # ══════════════════════════════════════════════════════════════════
 def train_svm(X_train, y_train):
-    """
-    Trains LinearSVC wrapped with CalibratedClassifierCV.
-    LinearSVC is faster than kernel SVC for high-dimensional text.
-    Calibration adds predict_proba() so we get confidence scores.
-    """
+    """Train LinearSVC with Platt calibration to enable predict_proba()."""
     print(f"\n{SEP}")
     print("  STEP 3c: TRAINING SVM (LinearSVC + Platt Calibration)")
     print(SEP2)
 
     t0 = time.time()
     base_svm = LinearSVC(C=1.0, max_iter=2000, random_state=42)
-    # CalibratedClassifierCV wraps the SVM and adds probability estimates
     model = CalibratedClassifierCV(base_svm, cv=5)
     model.fit(X_train, y_train)
     elapsed = time.time() - t0
@@ -250,13 +228,9 @@ def main():
     X, y, vectorizer, feature_names, cleaned_texts = load_and_prepare_data()
 
     # ── Split ─────────────────────────────────────────────────────
-    X_train, X_test, y_train, y_test, train_idx, test_idx = split_data(
-        X, y, cleaned_texts
-    )
+    X_train, X_test, y_train, y_test, train_idx, test_idx = split_data(X, y)
 
-    # ── Re-fit vectorizer on TRAIN only (correct ML practice) ─────
-    # The X above was fit on ALL data (for demo). Now we properly
-    # refit on train and re-transform to avoid data leakage.
+    # Re-fit vectorizer on train only to avoid data leakage
     print(f"\n  [Note] Re-fitting vectorizer on TRAIN set only (no data leakage)...")
     texts_array = np.array(cleaned_texts)
     vec_proper = create_tfidf_vectorizer()
@@ -277,10 +251,10 @@ def main():
     save_model(nb_model,    "naive_bayes.pkl")
     save_model(lr_model,    "logistic_regression.pkl")
     save_model(sv_model,    "svm.pkl")
-    vec_path = save_vectorizer(vec_proper)
+    save_vectorizer(vec_proper)
     print(f"  Saved: tfidf_vectorizer.pkl")
 
-    # Also save train/test indices so evaluate.py uses the same split
+    # Save split indices so evaluate.py reuses the exact same split
     joblib.dump({"train_idx": train_idx, "test_idx": test_idx},
                 os.path.join(MODELS_DIR, "split_indices.pkl"))
     print(f"  Saved: split_indices.pkl  (reuse same split in Phase 5)")
