@@ -11,6 +11,7 @@ const compareTable= document.getElementById("compare-table");
 const errorBanner = document.getElementById("error-banner");
 const errorMsg    = document.getElementById("error-msg");
 const confBar     = document.getElementById("conf-bar");
+const pigeonBubble = document.querySelector(".pigeon-bubble");
 
 // Single-model result fields
 const resPrediction = document.getElementById("res-prediction");
@@ -101,6 +102,10 @@ async function runSingle(text, model) {
 
   resultSingle.classList.add("visible");
   resultArea.classList.add("visible");
+
+  // Pigeon reacts
+  pigeonBubble.textContent = isSpam ? "🚨 Not delivering THAT." : "✅ Safe! I'll deliver it.";
+  pigeonBubble.classList.add("show");
 }
 
 // ── All-models comparison ─────────────────────────────────────────

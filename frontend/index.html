@@ -3,32 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spam Detector — ML Project</title>
-  <meta name="description" content="AI-powered SMS spam detector using Naive Bayes, Logistic Regression, and SVM models." />
+  <title>Spam or Ham? — Carrier Pigeon Mail Inspector</title>
+  <meta name="description" content="Is your message safe to deliver? Our carrier pigeon checks every message for spam." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ── Background orbs ── -->
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-orb orb-3"></div>
+  <!-- Pigeon mascot -->
+  <div class="pigeon-wrap">
+    <img src="pigeon.png" alt="Carrier Pigeon" class="pigeon-img" />
+    <div class="pigeon-bubble">Can I deliver this?</div>
+  </div>
 
   <div class="wrapper">
 
-    <!-- ── Header ── -->
+    <!-- Header -->
     <header class="header">
-      <div class="badge">ML Project · Phase 7</div>
-      <h1>Spam <span class="accent">Detector</span></h1>
-      <p class="subtitle">
-        Powered by TF-IDF + three trained classifiers.<br/>
-        Paste any SMS or email message to instantly classify it.
-      </p>
+      <h1>Ham or<br/><span class="accent">Spam?</span></h1>
+      <p class="tagline">Drop any message — the pigeon will sniff it out.</p>
     </header>
 
-    <!-- ── Main card ── -->
+    <!-- Main card -->
     <main class="card" id="main-card">
 
       <!-- Model selector -->
@@ -44,11 +41,11 @@
 
       <!-- Text input -->
       <div class="field-group">
-        <label class="field-label" for="msg-input">Message</label>
+        <label class="field-label" for="msg-input">Your Message</label>
         <div class="textarea-wrap">
           <textarea
             id="msg-input"
-            placeholder="Paste an SMS or email message here…&#10;e.g. FREE ENTRY! Win a £1000 prize. Call NOW!"
+            placeholder="Paste a message here and let the pigeon decide…"
             maxlength="2000"
             rows="5"
           ></textarea>
@@ -58,18 +55,19 @@
 
       <!-- Quick examples -->
       <div class="examples">
-        <span class="examples-label">Try an example:</span>
-        <button class="example-btn spam-ex" id="ex-spam">Spam message</button>
-        <button class="example-btn ham-ex"  id="ex-ham">Ham message</button>
+        <span class="examples-label">Try:</span>
+        <button class="example-btn spam-ex" id="ex-spam">🚨 Spam example</button>
+        <button class="example-btn ham-ex" id="ex-ham">✅ Ham example</button>
       </div>
 
       <!-- Action button -->
       <button class="check-btn" id="check-btn">
-        <span class="btn-text">Analyse Message</span>
+        <span class="btn-icon">🕊️</span>
+        <span class="btn-text">Send to the Pigeon</span>
         <span class="btn-spinner" id="btn-spinner"></span>
       </button>
 
-      <!-- Result area (hidden until response) -->
+      <!-- Result area -->
       <div class="result-area" id="result-area">
 
         <!-- Single model result -->
@@ -77,7 +75,7 @@
           <div class="result-badge" id="result-badge">SPAM</div>
           <div class="result-body">
             <div class="result-row">
-              <span class="res-label">Prediction</span>
+              <span class="res-label">Verdict</span>
               <span class="res-value" id="res-prediction">—</span>
             </div>
             <div class="result-row">
@@ -93,53 +91,44 @@
               <span class="res-value" id="res-model">—</span>
             </div>
             <div class="result-row">
-              <span class="res-label">Cleaned text</span>
+              <span class="res-label">After cleaning</span>
               <span class="res-value small" id="res-cleaned">—</span>
             </div>
           </div>
-
-          <!-- Confidence bar -->
           <div class="conf-bar-wrap">
             <div class="conf-bar-track">
               <div class="conf-bar-fill" id="conf-bar"></div>
             </div>
             <div class="conf-bar-labels">
-              <span>HAM</span><span>SPAM</span>
+              <span>🕊 Safe to deliver</span><span>☠ Block it</span>
             </div>
           </div>
         </div>
 
-        <!-- All-models comparison table -->
+        <!-- All-models comparison -->
         <div class="result-compare" id="result-compare">
-          <h3 class="compare-title">Model Comparison</h3>
-          <div class="compare-table" id="compare-table">
-            <!-- filled by JS -->
-          </div>
+          <h3 class="compare-title">All three models weigh in</h3>
+          <div class="compare-table" id="compare-table"></div>
         </div>
 
-      </div><!-- /result-area -->
+      </div>
 
       <!-- Error banner -->
       <div class="error-banner" id="error-banner">
-        <span id="error-msg">Something went wrong.</span>
+        <span>🕊</span> <span id="error-msg">Something went wrong.</span>
       </div>
 
     </main>
 
-    <!-- ── Stats strip ── -->
+    <!-- Stats strip -->
     <div class="stats-strip">
-      <div class="stat"><span class="stat-val">5,572</span><span class="stat-lbl">SMS messages trained on</span></div>
+      <div class="stat"><span class="stat-val">5,572</span><span class="stat-lbl">Messages trained on</span></div>
       <div class="stat"><span class="stat-val">98.65%</span><span class="stat-lbl">SVM accuracy</span></div>
-      <div class="stat"><span class="stat-val">94.85%</span><span class="stat-lbl">SVM F1 score</span></div>
+      <div class="stat"><span class="stat-val">94.85%</span><span class="stat-lbl">F1 score</span></div>
       <div class="stat"><span class="stat-val">5,000</span><span class="stat-lbl">TF-IDF features</span></div>
     </div>
 
-    <footer class="footer">
-      Spam Detection · ML Learning Project · Phase 7 of 8 &nbsp;·&nbsp;
-      <a href="http://127.0.0.1:8000/docs" target="_blank">API Docs ↗</a>
-    </footer>
-
-  </div><!-- /wrapper -->
+  </div>
 
   <script src="script.js"></script>
 </body>
